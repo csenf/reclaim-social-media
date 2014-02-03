@@ -279,13 +279,7 @@ class reclaim_module {
                 'post_status' => 'inherit',
                 'guid' => $uploads['url'] . "/" . $filename
             );
-            // set the ID for update and remove existing fields
-			if ($check['exists']) {
-				$attachment['ID'] = $check['attachment_id'];
-				unset($attachment['post_title']);
-				unset($attachment['post_mime_type']);
-				unset($attachment['guid']);
-			}
+			
             $attach_id = wp_insert_attachment( $attachment, $fullpathfilename, $post_id );
             if ( !$attach_id ) {
                 self::log("Failed to save record into database.");
