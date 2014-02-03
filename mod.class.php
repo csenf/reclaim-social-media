@@ -252,9 +252,24 @@ class reclaim_module {
             }
 
             $image_string = self::my_get_remote_content($imageurl);
-            $fileSaved = file_put_contents($uploads['path'] . "/" . $filename, $image_string);
-            if ( !$fileSaved ) {
-                self::log("The file cannot be saved.");
+            // check for double posted attachments
+            $check = self::check_attachment($image_string);
+            
+            // use existing attachment
+            if ($check['exists']) {
+            	$filename = $check['filename'];
+            	$fullpathfilename = path_join($uploads['basedir'], $filename);
+            }
+            // create new attachment-file
+            else {
+	            $fileSaved = file_put_contents($uploads['path'] . "/" . $filename, $image_string);
+	            if ( !$fileSaved ) {
+	                self::log("The file cannot be saved.");
+	            } else {
+					self::log('new attachment saved');
+					self::log($fullpathfilename);
+					self::log($filename);
+				}
             }
 
             $attachment = array(
@@ -264,6 +279,13 @@ class reclaim_module {
                 'post_status' => 'inherit',
                 'guid' => $uploads['url'] . "/" . $filename
             );
+            // set the ID for update and remove existing fields
+			if ($check['exists']) {
+				$attachment['ID'] = $check['attachment_id'];
+				unset($attachment['post_title']);
+				unset($attachment['post_mime_type']);
+				unset($attachment['guid']);
+			}
             $attach_id = wp_insert_attachment( $attachment, $fullpathfilename, $post_id );
             if ( !$attach_id ) {
                 self::log("Failed to save record into database.");
@@ -274,6 +296,9 @@ class reclaim_module {
             if ($set_post_thumbnail) {
                 set_post_thumbnail( $post_id, $attach_id);
             }
+            
+            // fill meta-data-field for duplicate checking
+            self::update_attachment_metdata($attach_id, $check);
 
         } catch (Exception $e) {
             self::log($e->getMessage());
@@ -295,6 +320,52 @@ class reclaim_module {
             return $data;
         }
     }
+    
+    public static function check_attachment(&$image_string) {
+		$attachment_found = false;
+		$md5 = md5($image_string);
+		
+		$args = array(
+				'post_type'   => 'attachment',
+				'post_status' => 'inherit',
+				'meta_query'  => array(
+						array(
+								'key'     => 'md5',
+								'value'   => $md5,
+								'compare' => '=',
+								'type'    => 'BINARY'
+		
+						)
+				)
+		);
+			
+		$query = new WP_Query( $args );
+		$posts = $query->get_posts();
+		 
+		if (sizeof($posts) > 0) {
+			$pid = $posts[0]->ID;
+		
+			if (wp_attachment_is_image($pid)) {
+				$meta = wp_get_attachment_metadata($pid);
+				$filename = $meta['file'];
+				$attachment_found = true;
+				self::log('duplicate attachment found: '.$filename);
+			}
+		}
+		
+		return array(
+			'exists' => $attachment_found,
+			'attachment_id' => $pid,
+			'filename' => $filename,
+			'md5' => $md5
+		);
+	}
+	
+	public static function update_attachment_metdata($attach_id, $check) {
+		if (!$check['exists']) {
+			update_post_meta($attach_id, 'md5', $check['md5']);
+		}
+	}
 
     public static function log($message) {
         file_put_contents(RECLAIM_PLUGIN_PATH.'/reclaim-log.txt', '['.date('c').']: '.$message."\n", FILE_APPEND);
