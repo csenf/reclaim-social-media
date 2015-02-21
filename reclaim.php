@@ -267,6 +267,7 @@ class reclaim_core {
         register_setting('reclaim-social-settings', 'reclaim_link_original');
         register_setting('reclaim-social-settings', 'reclaim_show_map');
         register_setting('reclaim-social-settings', 'reclaim_active_mod_name_list');
+        register_setting('reclaim-social-settings', 'reclaim_do_not_create_galleries');
         foreach($this->mods_loaded as $mod) {
             $mod['instance']->register_settings();
         }
@@ -299,6 +300,10 @@ class reclaim_core {
             <tr valign="top">
                 <th scope="row"><label for="reclaim_link_original"><?php _e('Link to original content', 'reclaim'); ?></label></th>
                 <td><input type="checkbox" name="reclaim_link_original" value="1" <?php checked(get_option('reclaim_link_original')); ?> /></td>
+            </tr>
+            <tr valign="top">
+                <th scope="row"><label for="reclaim_do_not_create_galleries"><?php _e('Don\'t include image in post content', 'reclaim'); ?></label></th>
+                <td><input type="checkbox" name="reclaim_do_not_create_galleries" value="1" <?php checked(get_option('reclaim_do_not_create_galleries')); ?> /></td>
             </tr>
             <tr valign="top">
                 <th scope="row"><label for="reclaim_show_map"><?php _e('Show integrated map', 'reclaim'); ?></label></th>

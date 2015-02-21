@@ -386,20 +386,25 @@ class instagram_reclaim_module extends reclaim_module {
         if ($entry['type']=='image') {
             $post_content_constructed = 
                  sprintf(__('I uploaded <a href="%s">an instagram</a>.', 'reclaim'), $entry['link'])
-                .'<div class="inimage">[gallery size="large" columns="1" link="file"]</div>';
+                 .(get_option('reclaim_do_not_create_galleries') ? '' :
+                 '<div class="inimage">[gallery size="large" columns="1" link="file"]</div>');
         } else {
             $post_content_constructed = 
                 '[video src="'.$entry['videos']['standard_resolution']['url'].'" poster="'.$image_url.'"]';
         }
         $post_content_constructed .= '<p class="viewpost-instagram">(<a rel="syndication" href="'.$entry['link'].'">'.__('View on Instagram', 'reclaim').'</a>)</p>';
-
+		
+        
         // instagram embed code:
         // <iframe src="//instagram.com/p/jD91oVoLab/embed/" width="612" height="710" frameborder="0" scrolling="no" allowtransparency="true"></iframe>
-        $embed_code = '<frameset><iframe class="instagram-embed" src="'.$entry['link'].'embed/" width="612" height="710" frameborder="0" scrolling="no" allowtransparency="true"></iframe>'
-            .'<noframes>'
-            .'<div class="inimage">[gallery size="large" columns="1" link="file"]</div>'
-            .'<p class="viewpost-instagram">(<a rel="syndication" href="'.$entry['link'].'">'.__('View on Instagram', 'reclaim').'</a>)</p>'
-            .'</noframes></frameset>';
+        $embed_code = '';
+		if (get_option('reclaim_create_galleries')) {
+        	$embed_code ='<frameset><iframe class="instagram-embed" src="'.$entry['link'].'embed/" width="612" height="710" frameborder="0" scrolling="no" allowtransparency="true"></iframe>'
+	            .'<noframes>'
+	            .'<div class="inimage">[gallery size="large" columns="1" link="file"]</div>'
+	            .'<p class="viewpost-instagram">(<a rel="syndication" href="'.$entry['link'].'">'.__('View on Instagram', 'reclaim').'</a>)</p>'
+	            .'</noframes></frameset>';
+		}
 
         $content = array(
             'original' =>  $post_content_original,

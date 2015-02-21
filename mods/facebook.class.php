@@ -324,7 +324,7 @@ class facebook_reclaim_module extends reclaim_module {
                 $link = self::get_link($entry, 0);
                 $image = self::get_image_url($entry);
                 $title = self::get_title($entry);
-                $content = self::construct_content($entry, $link, $image);
+                $content = self::construct_content($entry, $link, $entry['type']=="photo" && get_option('reclaim_do_not_create_galleries') ? '' : $image);
                 $post_format = self::get_post_format($entry);
                 if (($post_format=="link") && isset($entry['name'])) {
                     $title = $entry['name'];
