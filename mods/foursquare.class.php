@@ -23,7 +23,8 @@ class foursquare_reclaim_module extends reclaim_module {
     private static $timeout = 15;
     private static $count = 31; // maximum 31 days
     private static $post_format = 'status'; // or 'status', 'aside'
-	private static $known_source_urls = array('https://www.swarmapp.com');
+	private static $known_source_urls = array('https://www.swarmapp.com', 'https://foursquare.com/download/#/iphone', 'http://dayoneapp.com');
+	private static $ignored_source_urls = array('http://instagram.com');
 
 // callback-url: http://root.wirres.net/reclaim/wp-content/plugins/reclaim/vendor/hybridauth/hybridauth/src/
 // new app: http://instagram.com/developer/clients/manage/
@@ -199,6 +200,9 @@ class foursquare_reclaim_module extends reclaim_module {
     private function map_data(array $rawData, $type="posts") {
         $data = array();
         foreach($rawData['response']['checkins']['items'] as $checkin){
+        	if (isset($checkin['source']) && in_array($checkin['source']['url'], self::$ignored_source_urls)) {
+        		continue;
+        	}
 
                 $id = $checkin['id'];
                 // there might be more than one image (or) none. 
@@ -238,8 +242,11 @@ class foursquare_reclaim_module extends reclaim_module {
                 $post_date_gmt = date('Y-m-d H:i:s', $checkin["createdAt"]);
 				
 				if (isset($checkin['source'])) {
-					// $this->log($post_date_gmt.' '.$title.' source='.var_export($checkin['source'], true));
+					$post_meta['sourceName'] = $checkin['source']['name'];
+					$post_meta['sourceUrl'] = $checkin['source']['url'];
+					
 					if (!in_array($checkin['source']['url'], self::$known_source_urls)) {
+						// $this->log($post_date_gmt.' '.$title.' source='.var_export($checkin['source'], true));
 						$tags[] = 'fsqr-app:'.$checkin['source']['name'];
 					}
 				}
