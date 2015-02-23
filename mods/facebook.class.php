@@ -299,6 +299,9 @@ class facebook_reclaim_module extends reclaim_module {
                     && $entry['application']['namespace'] != "NetworkedBlogs" // no  NetworkedBlogs syndication
                     && $entry['application']['namespace'] != "ifthisthenthat" // no instagrams and ifttt
                     && $entry['application']['namespace'] != "friendfeed" // no friendfeed
+                    && $entry['application']['namespace'] != "instapp" // no instagrams
+                    && $entry['application']['namespace'] != "getswarm" // no swarm
+                    && $entry['application']['namespace'] != "playfoursquare" // no foursquare
                     )
                && ( $entry['status_type'] != "approved_friend" ) // no new friend anouncements
                // difficult: if privacy value is empty, is it public? it seems to me, but i'm not sure
