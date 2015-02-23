@@ -23,6 +23,7 @@ class foursquare_reclaim_module extends reclaim_module {
     private static $timeout = 15;
     private static $count = 31; // maximum 31 days
     private static $post_format = 'status'; // or 'status', 'aside'
+	private static $known_source_urls = array('https://www.swarmapp.com');
 
 // callback-url: http://root.wirres.net/reclaim/wp-content/plugins/reclaim/vendor/hybridauth/hybridauth/src/
 // new app: http://instagram.com/developer/clients/manage/
@@ -211,7 +212,7 @@ class foursquare_reclaim_module extends reclaim_module {
                 } else {
                     $image_url = '';
                 }
-                $tags = '';
+                $tags = [];
                 $link = 'https://foursquare.com/user/'.get_option('foursquare_user_id').'/checkin/'.$id;
                 $content = '<p>'.sprintf(__('Checked in to <a href="%s">%s</a>', 'reclaim'), $link, $checkin['venue']['name']).'</p>';
                 // added htmlentities() just to be sure
@@ -235,13 +236,20 @@ class foursquare_reclaim_module extends reclaim_module {
 
                 $post_date = date('Y-m-d H:i:s', $checkin["createdAt"] + ($checkin['timeZoneOffset'] * 60 ) - get_option( 'gmt_offset' ) * 3600);
                 $post_date_gmt = date('Y-m-d H:i:s', $checkin["createdAt"]);
+				
+				if (isset($checkin['source'])) {
+					// $this->log($post_date_gmt.' '.$title.' source='.var_export($checkin['source'], true));
+					if (!in_array($checkin['source']['url'], self::$known_source_urls)) {
+						$tags[] = 'fsqr-app:'.$checkin['source']['name'];
+					}
+				}
                 
                 $data[] = array(
                     'post_author' => get_option($this->shortname.'_author'),
                     'post_category' => array(get_option($this->shortname.'_category')),
                     'post_format' => self::$post_format,
                     'post_date' => get_date_from_gmt($post_date),
-                    'post_date_gmt' => $post_date_gmt,
+                    'post_date_gmt' => $post_date_gmt, 
                     'post_content' => $content,
                     'post_title' => $title,
                     'post_type' => 'post',
