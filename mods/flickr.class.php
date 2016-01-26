@@ -21,7 +21,7 @@ class flickr_reclaim_module extends reclaim_module {
     public RSS, gets 20 last images of a user
 */  
     private static $feedurl = "http://www.flickr.com/services/feeds/photos_public.gne?id=%s&lang=%s&format=json";
-    private static $apiurl  = "http://api.flickr.com/services/rest/?method=flickr.people.getPublicPhotos&user_id=%s&per_page=%s&page=%s&format=json&api_key=%s&extras=description,license,date_upload,date_taken,owner_name,icon_server,original_format,last_update,geo,tags,machine_tags,o_dims,views,media,url_l,url_o";
+    private static $apiurl  = "https://api.flickr.com/services/rest/?method=flickr.people.getPublicPhotos&user_id=%s&per_page=%s&page=%s&format=json&api_key=%s&extras=description,license,date_upload,date_taken,owner_name,icon_server,original_format,last_update,geo,tags,machine_tags,o_dims,views,media,url_l,url_o";
 
 /*
     querying the API requires an API-key, but gets more than 20 images. in fact
